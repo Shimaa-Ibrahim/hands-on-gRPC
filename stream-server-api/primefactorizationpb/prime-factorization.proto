@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package primefactorization;
+
+option go_package = "primefactorizationpb";
+
+message PrimeFactorizationRequest {
+    int64 number = 1;
+}
+
+message PrimeFactorizationResponse {
+    int64 prime_factor = 1;
+}
+
+service PrimeFactorizationService {
+    rpc PrimeFactorization(PrimeFactorizationRequest) returns (stream PrimeFactorizationResponse) {};
+}
