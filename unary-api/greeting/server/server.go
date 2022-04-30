@@ -6,8 +6,11 @@ import (
 	"grpc/unary-api/greeting/greetingpb"
 	"log"
 	"net"
+	"regexp"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type server struct {
@@ -17,6 +20,10 @@ type server struct {
 func (*server) Greeting(ctx context.Context, req *greetingpb.GreetingRequest) (*greetingpb.GreetingResponse, error) {
 
 	name := req.GetName()
+	if !regexp.MustCompile(`^[a-zA-Z\s]*$`).MatchString(name) {
+		return nil, status.Errorf(codes.InvalidArgument, "Name should contain 'Alphanumeric Characters' only")
+	}
+
 	res := "Hello! " + name
 	response := &greetingpb.GreetingResponse{
 		Results: res,

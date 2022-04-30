@@ -11,7 +11,8 @@ message GreetingRequest{
 message GreetingResponse{
     string results = 1;
 }
-
+// throw exception if greeting req name contains any num or special char "allow white spaces"
+// err of type invalid arg
 service GreetingService{
     rpc Greeting(GreetingRequest) returns (GreetingResponse) {};
 }

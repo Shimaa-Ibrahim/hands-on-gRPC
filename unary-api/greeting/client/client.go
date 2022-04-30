@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -20,21 +21,24 @@ func main() {
 	defer cc.Close()
 
 	c := greetingpb.NewGreetingServiceClient(cc)
-	response := unaryGRPC(c)
-	fmt.Println(response.Results)
+	unaryGRPC(c, "whole wolrd :'D")
+	unaryGRPC(c, "whole wolrd")
 }
 
-func unaryGRPC(c greetingpb.GreetingServiceClient) *greetingpb.GreetingResponse {
+func unaryGRPC(c greetingpb.GreetingServiceClient, name string) {
 	req := &greetingpb.GreetingRequest{
-		Name: "whole wolrd :'D",
+		Name: name,
 	}
-
 	res, err := c.Greeting(context.Background(), req)
-
 	if err != nil {
-		log.Fatalf("err while listening to grpc server %v\n", err)
+		resErr, ok := status.FromError(err)
+		if ok {
+			fmt.Printf("server err msg: '%v' with err code: %v\n", resErr.Message(), resErr.Code())
+			return
+		} else {
+			log.Fatalf("err while listening to grpc server %v\n", resErr)
+		}
 	}
-
-	return res
+	fmt.Println(res.Results)
 
 }
