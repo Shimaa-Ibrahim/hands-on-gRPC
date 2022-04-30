@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"grpc/unary-api/greeting/greetingpb"
 	"log"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
@@ -23,13 +24,17 @@ func main() {
 	c := greetingpb.NewGreetingServiceClient(cc)
 	unaryGRPC(c, "whole wolrd :'D")
 	unaryGRPC(c, "whole wolrd")
+	unaryGRPC(c, "deadline exceeded")
 }
 
 func unaryGRPC(c greetingpb.GreetingServiceClient, name string) {
 	req := &greetingpb.GreetingRequest{
 		Name: name,
 	}
-	res, err := c.Greeting(context.Background(), req)
+	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Millisecond)
+	defer cancel()
+
+	res, err := c.Greeting(ctx, req)
 	if err != nil {
 		resErr, ok := status.FromError(err)
 		if ok {
