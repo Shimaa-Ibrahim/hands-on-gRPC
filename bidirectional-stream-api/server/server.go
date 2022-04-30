@@ -8,6 +8,7 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type server struct {
@@ -48,7 +49,22 @@ func main() {
 		log.Fatalf("failed to listen %v", err)
 	}
 
-	s := grpc.NewServer()
+	opts := []grpc.ServerOption{}
+
+	tls := true
+	if tls {
+		crtFile := "ssl/server.crt"
+		keyFile := "ssl/server.pem"
+
+		creds, sslErr := credentials.NewServerTLSFromFile(crtFile, keyFile)
+		if sslErr != nil {
+			log.Fatalf("cannot load credential files %v", sslErr)
+			return
+		}
+		opts = append(opts, grpc.Creds(creds))
+	}
+
+	s := grpc.NewServer(opts...)
 	maximumpb.RegisterMaximumServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {
