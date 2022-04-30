@@ -9,6 +9,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/reflection"
 )
 
 type server struct {
@@ -65,6 +66,7 @@ func main() {
 	}
 
 	s := grpc.NewServer(opts...)
+	reflection.Register(s)
 	maximumpb.RegisterMaximumServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {

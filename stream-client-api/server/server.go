@@ -8,6 +8,7 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type server struct {
@@ -47,6 +48,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
+	reflection.Register(s)
 	averagepb.RegisterAverageServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {
