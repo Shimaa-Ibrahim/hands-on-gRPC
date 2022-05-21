@@ -6,6 +6,8 @@ import (
 	"grpc/unary-api/greeting/greetingpb"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 	"regexp"
 	"time"
 
@@ -44,6 +46,7 @@ func (*server) Greeting(ctx context.Context, req *greetingpb.GreetingRequest) (*
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	fmt.Println("Hello! world...")
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
@@ -54,7 +57,19 @@ func main() {
 	reflection.Register(s)
 	greetingpb.RegisterGreetingServiceServer(s, &server{})
 
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("fatal err: %v", err)
-	}
+	go func() {
+		fmt.Println("'go routune' starting server..")
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("fatal err: %v", err)
+		}
+	}()
+
+	waits := make(chan os.Signal, 1)
+	signal.Notify(waits, os.Interrupt)
+	<-waits
+	fmt.Println("stoping server...")
+	s.Stop()
+	lis.Close()
+	fmt.Println("........")
+
 }
